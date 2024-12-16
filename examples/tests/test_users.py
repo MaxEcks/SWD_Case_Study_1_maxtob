@@ -4,7 +4,7 @@ import unittest
 # We must tell the interpreter where to find the module we want to test
 # Be careful with the path, it must be relative to the root of the project
 import sys
-sys.path.append('src')
+sys.path.append('sources')
 
 # import the geometries module
 from users import User
