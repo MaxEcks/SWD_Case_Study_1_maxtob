@@ -1,12 +1,12 @@
 import os
 
 from tinydb import TinyDB, Query
-from serializer import serializer
+from database_singleton import DatabaseConnector
 
 
 class Device():
     # Class variable that is shared between all instances of the class
-    db_connector = TinyDB(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.json'), storage=serializer).table('devices')
+    db_connector = db_connector = DatabaseConnector().get_table('devices')
 
     # Constructor
     def __init__(self, device_name : str, managed_by_user_id : str, device_id : int, maintenance_interval : int, maintenance_cost : float):
@@ -59,7 +59,7 @@ class Device():
 
     # Class method that can be called without an instance of the class to construct an instance of the class
     @classmethod
-    def find_by_attribute(cls, by_attribute: str, attribute_value: str, num_to_return=1):
+    def find_by_attribute(cls, by_attribute: str, attribute_value: str, num_to_return=len(db_connector)): # find_by_attribute should search for all records, therefore default value should be length of the table
         # Load data from the database and create an instance of the Device class
         DeviceQuery = Query()
         result = cls.db_connector.search(DeviceQuery[by_attribute] == attribute_value)
@@ -86,10 +86,10 @@ class Device():
 
 
 
-    
+ # Module testing:
 
 if __name__ == "__main__":
-    # Create a device
+    
     device1 = Device("Device1", "one@mci.edu")
     device2 = Device("Device2", "two@mci.edu") 
     device3 = Device("Device3", "two@mci.edu") 
@@ -98,10 +98,13 @@ if __name__ == "__main__":
     device2.store_data()
     device3.store_data()
     device4.store_data()
+    
+    # overwrite device3:
     device5 = Device("Device3", "four@mci.edu") 
     device5.store_data()
 
-    #loaded_device = Device.find_by_attribute("device_name", "Device2")
+    # testing find_by_attribute method:
+    # loaded_device = Device.find_by_attribute("device_name", "Device2")
     loaded_device = Device.find_by_attribute("managed_by_user_id", "two@mci.edu")
     if loaded_device:
         print(f"Loaded Device: {loaded_device}")
@@ -113,4 +116,5 @@ if __name__ == "__main__":
     for device in devices:
         print(device)
 
+    # print(len(DatabaseConnector().get_table('devices')))
     
