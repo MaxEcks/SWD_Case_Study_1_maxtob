@@ -33,7 +33,7 @@ with tab2:
             if existing_device:             
                 st.error("Geräte-ID ist bereits vorhanden!")
 
-            elif device_id and device_name:
+            elif device_id and device_name and managed_by_user_id:
                 new_device = Device(
                     device_id = device_id,
                     device_name = device_name,
@@ -66,13 +66,15 @@ with tab2:
                 new_maintenance_cost = st.number_input("Wartungskosten in Euro", min_value=0.0, step=0.01, value=selected_device.maintenance_cost)
 
                 if st.button("Änderungen speichern"):
-                    
-                    selected_device.device_name = new_device_name
-                    selected_device.managed_by_user_id = new_managed_by_user_id
-                    selected_device.maintenance_interval = new_maintenance_interval
-                    selected_device.maintenance_cost = new_maintenance_cost
+                    if new_device_name and new_managed_by_user_id:
+                        selected_device.device_name = new_device_name
+                        selected_device.managed_by_user_id = new_managed_by_user_id
+                        selected_device.maintenance_interval = new_maintenance_interval
+                        selected_device.maintenance_cost = new_maintenance_cost
                                      
-                    selected_device.store_data()
-                    st.success("Gerätedaten wurden aktualisiert!")
+                        selected_device.store_data()
+                        st.success("Gerätedaten wurden aktualisiert!")
+                    else: 
+                        st.error("Fülle alle Felder aus!")
             else:
                 st.error("Gerät nicht gefunden.")
