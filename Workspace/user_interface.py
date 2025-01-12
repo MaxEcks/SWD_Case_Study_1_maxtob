@@ -90,7 +90,9 @@ with tab2:
             # Überprüfung ob Geräte-ID schon vorhanden ist
             existing_device = Device.find_by_attribute("device_id", device_id)
             if existing_device:             
-                st.error("Geräte-ID ist bereits vorhanden!")
+                st.error(f"Gerät mit dieser Geräte-ID ist bereits vorhanden: {existing_device}!")
+                time.sleep(3)
+                st.rerun()
 
             elif device_id and device_name and managed_by_user:
                 managed_by_user_id = user_options[managed_by_user].id
@@ -103,8 +105,12 @@ with tab2:
                 )
                 new_device.store_data()
                 st.success("Gerät hinzugefügt!")
+                time.sleep(3)
+                st.rerun()
             else:
                 st.error("Bitte alle Felder ausfüllen.")
+                time.sleep(3)
+                st.rerun()
 
     with tab2_2:
         # Bestehende Geräte ändern
@@ -113,41 +119,73 @@ with tab2:
 
         device_names = [device.device_name for device in devices_in_db]
         
-        selected_device_name = st.selectbox("Wählen Sie ein Gerät aus", device_names)
+        selected_device_name = st.selectbox("Wählen Sie ein Gerät aus", device_names, key="select_device_name")
 
         if selected_device_name:
             selected_device = Device.find_by_attribute("device_name", selected_device_name, 1)
             
             if selected_device:
                 st.write(f"Gerät: {selected_device.device_name}")
-                new_device_name = st.text_input("Gerätename", selected_device.device_name)
+                new_device_name = st.text_input("Gerätename", selected_device.device_name, key="new_device_name")
+
                 users = User.find_all()
-                user_options = {user.id: user for user in users}                 
-                new_managed_by_user = st.selectbox("Verantwortliche Person", list(user_options.keys()))
-                new_maintenance_interval = st.number_input("Wartungsintervall in Tage", min_value=1, step=1, value=selected_device.maintenance_interval)
-                new_maintenance_cost = st.number_input("Wartungskosten in Euro", min_value=0.0, step=0.01, value=selected_device.maintenance_cost)
+                user_options = {f"{user.name} ({user.id})": user for user in users}
+                
+                # Finden des aktuellen Benutzers in der Liste:
+                current_user_display = f"{selected_device.managed_by_user_id}"
+                for user in users:
+                    if user.id == selected_device.managed_by_user_id:
+                        current_user_display = f"{user.name} ({user.id})"
+                        break
+                new_managed_by_user = st.selectbox("Verantwortliche Person", list(user_options.keys()), index=list(user_options.keys()).index(current_user_display), key="new_managed_by_user")
+
+                new_maintenance_interval = st.number_input("Wartungsintervall in Tage", min_value=1, step=1, value=selected_device.maintenance_interval, key="new_maintenance_interval")
+                new_maintenance_cost = st.number_input("Wartungskosten in Euro", min_value=0.0, step=0.01, value=selected_device.maintenance_cost, key="new_maintenance_cost")
 
                 if st.button("Änderungen speichern", key="saves_changes_button"):
                     if new_device_name and new_managed_by_user:
-                        selected_user = user_options[new_managed_by_user]
                         selected_device.device_name = new_device_name
+                        selected_user = user_options[new_managed_by_user]
                         selected_device.managed_by_user_id = selected_user.id                      
                         selected_device.maintenance_interval = new_maintenance_interval
                         selected_device.maintenance_cost = new_maintenance_cost
                                      
                         selected_device.store_data()
                         st.success("Gerätedaten wurden aktualisiert!")
+                        time.sleep(3)
+                        st.rerun()
                     else: 
                         st.error("Fülle alle Felder aus!")
+                        time.sleep(3)
+                        st.rerun()
 
-                if st.button("Gerät löschen", key="delete device"):
+                if st.button("Gerät löschen", key="delete_device_button"):
                     selected_device.delete()
                     st.success(f"Gerät erfolgreich entfernt")
+                    time.sleep(3)
+                    st.rerun()
             else:
                 st.error("Gerät nicht gefunden.")
+                time.sleep(3)
+                st.rerun()
+
+with tab3:
+    #Reservierung
+    st.write("#### Funktion in Bearbeitung!")
+
+with tab4:
+    # Wartungsmanagement
+    st.write("#### Funktion in Bearbeitung!")
 
 # Konsolen Debugging:
 users = User.find_all()
-print("All users:")
+devices = Device.find_all()
+print("--- database content: ---")
+
+print("users:")
 for user in users:
     print(user)
+
+print("devices:")
+for device in devices:
+    print(device)
