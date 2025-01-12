@@ -8,11 +8,14 @@ class Device():
     db_connector = db_connector = DatabaseConnector().get_table('devices')
 
     # Constructor
-    def __init__(self, device_name : str, managed_by_user_id : str) -> None:
+    def __init__(self, device_name : str, managed_by_user_id : str, device_id : int, maintenance_interval : int, maintenance_cost : float) -> None:
         self.device_name = device_name
         # The user id of the user that manages the device
         # We don't store the user object itself, but only the id (as a key)
         self.managed_by_user_id = managed_by_user_id
+        self.device_id = device_id
+        self.maintenance_interval = maintenance_interval
+        self.maintenance_cost = maintenance_cost
         self.is_active = True
         
     # String representation of the class
@@ -62,7 +65,7 @@ class Device():
 
         if result:
             data = result[:num_to_return]
-            device_results = [cls(d['device_name'], d['managed_by_user_id']) for d in data]
+            device_results = [cls(d['device_name'], d['managed_by_user_id'], d['device_id'], d['maintenance_interval'], d['maintenance_cost']) for d in data]
             return device_results if num_to_return > 1 else device_results[0]
         else:
             return None
@@ -72,7 +75,12 @@ class Device():
         # Load all data from the database and create instances of the Device class
         devices = []
         for device_data in Device.db_connector.all():
-            devices.append(Device(device_data['device_name'], device_data['managed_by_user_id']))
+            devices.append(Device(
+                device_data['device_name'], 
+                device_data['managed_by_user_id'],
+                device_data['device_id'],
+                device_data['maintenance_interval'],
+                device_data['maintenance_cost']))
         return devices
 
 # Module testing:
