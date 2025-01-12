@@ -3,25 +3,21 @@ import os
 from tinydb import TinyDB, Query
 from database_singleton import DatabaseConnector
 
-
 class Device():
     # Class variable that is shared between all instances of the class
     db_connector = db_connector = DatabaseConnector().get_table('devices')
 
     # Constructor
-    def __init__(self, device_name : str, managed_by_user_id : str, device_id : int, maintenance_interval : int, maintenance_cost : float):
+    def __init__(self, device_name : str, managed_by_user_id : str) -> None:
         self.device_name = device_name
         # The user id of the user that manages the device
         # We don't store the user object itself, but only the id (as a key)
         self.managed_by_user_id = managed_by_user_id
-        self.device_id = device_id
-        self.maintenance_interval = maintenance_interval
-        self.maintenance_cost = maintenance_cost
         self.is_active = True
-                
+        
     # String representation of the class
     def __str__(self):
-        return f'Device (Object) {self.device_name} ({self.managed_by_user_id})'
+        return f'Device (Object): {self.device_name} ({self.managed_by_user_id})'
 
     # String representation of the class
     def __repr__(self):
@@ -29,12 +25,12 @@ class Device():
     
     def store_data(self):
         print("Storing data...")
-        # Check if the device already exists in the database
+        # Check if the device already exists in the database (key is the device-name)
         DeviceQuery = Query()
         result = self.db_connector.search(DeviceQuery.device_name == self.device_name)
         if result:
             # Update the existing record with the current instance's data
-            result = self.db_connector.update(self.__dict__, doc_ids=[result[0].doc_id])
+            self.db_connector.update(self.__dict__, doc_ids=[result[0].doc_id])
             print("Data updated.")
         else:
             # If the device doesn't exist, insert a new record
@@ -43,7 +39,7 @@ class Device():
     
     def delete(self):
         print("Deleting data...")
-        # Check if the device exists in the database
+        # Check if the device exists in the database (key is the device-name)
         DeviceQuery = Query()
         result = self.db_connector.search(DeviceQuery.device_name == self.device_name)
         if result:
@@ -59,14 +55,14 @@ class Device():
 
     # Class method that can be called without an instance of the class to construct an instance of the class
     @classmethod
-    def find_by_attribute(cls, by_attribute: str, attribute_value: str, num_to_return=len(db_connector)): # find_by_attribute should search for all records, therefore default value should be length of the table
+    def find_by_attribute(cls, by_attribute: str, attribute_value: str, num_to_return=len(db_connector)):   # find_by_attribute should search for all records, therefore default value should be length of the table
         # Load data from the database and create an instance of the Device class
         DeviceQuery = Query()
         result = cls.db_connector.search(DeviceQuery[by_attribute] == attribute_value)
 
         if result:
             data = result[:num_to_return]
-            device_results = [cls(d['device_name'], d['managed_by_user_id'], d['device_id'], d['maintenance_interval'], d['maintenance_cost']) for d in data]
+            device_results = [cls(d['device_name'], d['managed_by_user_id']) for d in data]
             return device_results if num_to_return > 1 else device_results[0]
         else:
             return None
@@ -76,17 +72,10 @@ class Device():
         # Load all data from the database and create instances of the Device class
         devices = []
         for device_data in Device.db_connector.all():
-            devices.append(Device(
-                device_data['device_name'], 
-                device_data['managed_by_user_id'],
-                device_data['device_id'],
-                device_data['maintenance_interval'],
-                device_data['maintenance_cost']))
+            devices.append(Device(device_data['device_name'], device_data['managed_by_user_id']))
         return devices
 
-
-
- # Module testing:
+# Module testing:
 
 if __name__ == "__main__":
     
@@ -117,4 +106,5 @@ if __name__ == "__main__":
         print(device)
 
     # print(len(DatabaseConnector().get_table('devices')))
+    
     

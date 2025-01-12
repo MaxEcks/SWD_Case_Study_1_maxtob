@@ -5,7 +5,7 @@ import time
 
 st.write("# Gerätemanagement")
 
-tab1, tab2 = st.tabs(["Nutzerverwaltung", "Geräteverwaltung"])
+tab1, tab2, tab3, tab4 = st.tabs(["Nutzerverwaltung", "Geräteverwaltung", "Reservierung", "Wartungsmanagement"])
 
 with tab1:
     # Untertabs für Nutzerverwaltung:
@@ -75,34 +75,14 @@ with tab1:
 with tab2:
     #Geräteverwaltung
     tab2_1, tab2_2 = st.tabs(["Gerät anlegen", "Gerät ändern"])
-
     with tab2_1:
-        # Eingabefelder zum Gerät hinzufügen 
         device_id = st.number_input("Geräte-ID", min_value=0, step=1)
         device_name = st.text_input("Gerätename")
         maintenance_interval = st.number_input("Wartungsintervall in Tage", min_value=1, step=1)
         maintenance_cost = st.number_input("Wartungskosten in Euro", min_value=0.0, step=0.01)
-        managed_by_user_id = st.text_input("Verantwortliche Person")
-       
-        if st.button("Gerät hinzufügen"):
-            # Überprüfung ob Geräte-ID schon vorhanden ist
-            existing_device = Device.find_by_attribute("device_id", device_id)
-            if existing_device:             
-                st.error("Geräte-ID ist bereits vorhanden!")
-
-            elif device_id and device_name and managed_by_user_id:
-                new_device = Device(
-                    device_id = device_id,
-                    device_name = device_name,
-                    maintenance_interval = maintenance_interval,
-                    maintenance_cost = maintenance_cost,
-                    managed_by_user_id = managed_by_user_id
-                )
-                new_device.store_data()
-                st.success("Gerät hinzugefügt!")
-            else:
-                st.error("Bitte alle Felder ausfüllen.")
-
+        responsible_user = st.text_input("Verantwortliche Person") #Besser mit einer selectbox? (kann erst nach der Implementierung der Datenbank implementiert werden)
+        st.button("Gerät hinzufügen")
+    
     with tab2_2:
         pass #Hier (Gerät ändern) muss man noch den Aufruf eines bestehenden Gerätes implementieren (z.B. selectbox). Kann aber erst nach der Implementierung der
              #Datenbank gemacht werden
