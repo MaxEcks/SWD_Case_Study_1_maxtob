@@ -82,15 +82,18 @@ with tab2:
         device_name = st.text_input("Gerätename")
         maintenance_interval = st.number_input("Wartungsintervall in Tage", min_value=1, step=1)
         maintenance_cost = st.number_input("Wartungskosten in Euro", min_value=0.0, step=0.01)
-        managed_by_user_id = st.text_input("Verantwortliche Person")
-       
+        users = User.find_all()
+        user_options = {f"{user.name} ({user.id})": user for user in users}
+        managed_by_user = st.selectbox("Verantwortliche Person", list(user_options.keys()))
+
         if st.button("Gerät hinzufügen"):
             # Überprüfung ob Geräte-ID schon vorhanden ist
             existing_device = Device.find_by_attribute("device_id", device_id)
             if existing_device:             
                 st.error("Geräte-ID ist bereits vorhanden!")
 
-            elif device_id and device_name and managed_by_user_id:
+            elif device_id and device_name and managed_by_user:
+                managed_by_user_id = user_options[managed_by_user].id
                 new_device = Device(
                     device_id = device_id,
                     device_name = device_name,
@@ -113,19 +116,21 @@ with tab2:
         selected_device_name = st.selectbox("Wählen Sie ein Gerät aus", device_names)
 
         if selected_device_name:
-            selected_device = Device.find_by_attribute("device_name", selected_device_name)
+            selected_device = Device.find_by_attribute("device_name", selected_device_name, 1)
             
             if selected_device:
                 st.write(f"Gerät: {selected_device.device_name}")
                 new_device_name = st.text_input("Gerätename", selected_device.device_name)
-                new_managed_by_user_id = st.text_input("Verantwortliche Person", selected_device.managed_by_user_id)
+                users = User.find_all()
+                user_options = {f"{user.name} ({user.id})": user for user in users}
+                new_managed_by_user = st.selectbox("Verantwortliche Person", list(user_options.keys()), index=list(user_options.keys()).index(f"{selected_device.managed_by_user_id}"))                 
                 new_maintenance_interval = st.number_input("Wartungsintervall in Tage", min_value=1, step=1, value=selected_device.maintenance_interval)
                 new_maintenance_cost = st.number_input("Wartungskosten in Euro", min_value=0.0, step=0.01, value=selected_device.maintenance_cost)
 
                 if st.button("Änderungen speichern"):
-                    if new_device_name and new_managed_by_user_id:
+                    if new_device_name and new_managed_by_user:
                         selected_device.device_name = new_device_name
-                        selected_device.managed_by_user_id = new_managed_by_user_id
+                        selected_device.managed_by_user_id = user_options[new_managed_by_user].id                        
                         selected_device.maintenance_interval = new_maintenance_interval
                         selected_device.maintenance_cost = new_maintenance_cost
                                      
