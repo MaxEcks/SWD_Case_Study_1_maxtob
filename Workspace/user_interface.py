@@ -78,7 +78,7 @@ with tab2:
 
     with tab2_1:
         # Eingabefelder zum Gerät hinzufügen 
-        device_id = st.number_input("Geräte-ID", min_value=0, step=1)
+        device_id = st.number_input("Geräte-ID (min. 1)", min_value=0, step=1)
         device_name = st.text_input("Gerätename")
         maintenance_interval = st.number_input("Wartungsintervall in Tage", min_value=1, step=1)
         maintenance_cost = st.number_input("Wartungskosten in Euro", min_value=0.0, step=0.01)
@@ -122,15 +122,16 @@ with tab2:
                 st.write(f"Gerät: {selected_device.device_name}")
                 new_device_name = st.text_input("Gerätename", selected_device.device_name)
                 users = User.find_all()
-                user_options = {f"{user.name} ({user.id})": user for user in users}
-                new_managed_by_user = st.selectbox("Verantwortliche Person", list(user_options.keys()), index=list(user_options.keys()).index(f"{selected_device.managed_by_user_id}"))                 
+                user_options = {user.id: user for user in users}                 
+                new_managed_by_user = st.selectbox("Verantwortliche Person", list(user_options.keys()))
                 new_maintenance_interval = st.number_input("Wartungsintervall in Tage", min_value=1, step=1, value=selected_device.maintenance_interval)
                 new_maintenance_cost = st.number_input("Wartungskosten in Euro", min_value=0.0, step=0.01, value=selected_device.maintenance_cost)
 
-                if st.button("Änderungen speichern"):
+                if st.button("Änderungen speichern", key="saves_changes_button"):
                     if new_device_name and new_managed_by_user:
+                        selected_user = user_options[new_managed_by_user]
                         selected_device.device_name = new_device_name
-                        selected_device.managed_by_user_id = user_options[new_managed_by_user].id                        
+                        selected_device.managed_by_user_id = selected_user.id                      
                         selected_device.maintenance_interval = new_maintenance_interval
                         selected_device.maintenance_cost = new_maintenance_cost
                                      
@@ -138,6 +139,10 @@ with tab2:
                         st.success("Gerätedaten wurden aktualisiert!")
                     else: 
                         st.error("Fülle alle Felder aus!")
+
+                if st.button("Gerät löschen", key="delete device"):
+                    selected_device.delete()
+                    st.success(f"Gerät erfolgreich entfernt")
             else:
                 st.error("Gerät nicht gefunden.")
 
