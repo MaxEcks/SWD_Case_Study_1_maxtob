@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 # Ignoring the examples directory
-# examples/
+examples/
 
 # Ignoring the database.json file in the Workspace directory
 Workspace/database.json
