@@ -78,7 +78,7 @@ with tab2:
 
     with tab2_1:
         # Eingabefelder zum Gerät hinzufügen 
-        device_id = st.number_input("Geräte-ID (min. 1)", min_value=0, step=1)
+        st.write("Geräte-ID wird automatisch vergeben (UUID)")
         device_name = st.text_input("Gerätename")
         maintenance_interval = st.number_input("Wartungsintervall in Tage", min_value=1, step=1)
         maintenance_cost = st.number_input("Wartungskosten in Euro", min_value=0.0, step=0.01)
@@ -88,16 +88,15 @@ with tab2:
 
         if st.button("Gerät hinzufügen"):
             # Überprüfung ob Geräte-ID schon vorhanden ist
-            existing_device = Device.find_by_attribute("device_id", device_id)
+            existing_device = Device.find_by_attribute("device_name", device_name)
             if existing_device:             
-                st.error(f"Gerät mit dieser Geräte-ID ist bereits vorhanden: {existing_device}!")
+                st.error(f"Gerät mit diesem Namen existiert bereits: {existing_device}!")
                 time.sleep(3)
                 st.rerun()
 
-            elif device_id and device_name and managed_by_user:
+            elif device_name and managed_by_user:
                 managed_by_user_id = user_options[managed_by_user].id
                 new_device = Device(
-                    device_id = device_id,
                     device_name = device_name,
                     maintenance_interval = maintenance_interval,
                     maintenance_cost = maintenance_cost,
@@ -125,6 +124,7 @@ with tab2:
             selected_device = Device.find_by_attribute("device_name", selected_device_name, 1)
             
             if selected_device:
+                selected_device = selected_device[0]
                 st.write(f"Gerät: {selected_device.device_name}")
                 new_device_name = st.text_input("Gerätename", selected_device.device_name, key="new_device_name")
 
