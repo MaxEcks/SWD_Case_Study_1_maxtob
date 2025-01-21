@@ -18,12 +18,12 @@ class User:
     def __repr__(self):
         return self.__str__()
     
-    @classmethod
+    @staticmethod
     def find_all(cls) -> list:
         """Find all users in the database"""
         pass
 
-    @staticmethod
+    @classmethod
     def find_by_attribute(cls, by_attribute : str, attribute_value : str) -> 'User':
         """From the matches in the database, select the user with the given attribute value"""
         pass

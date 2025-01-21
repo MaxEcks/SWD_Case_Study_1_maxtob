@@ -1,5 +1,3 @@
-import os
-
 from tinydb import TinyDB, Query
 from database_singleton import DatabaseConnector
 

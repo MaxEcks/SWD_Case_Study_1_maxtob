@@ -1,0 +1,36 @@
+{
+    "devices": {
+        "1": {
+            "device_name": "Device1",
+            "managed_by_user_id": "one@mci.edu",
+            "is_active": true,
+            "end_of_life": null,
+            "creation_date": "{TinyDateTime}:2025-01-08T13:24:45.100610",
+            "last_update": "{TinyDateTime}:2025-01-08T13:24:45.100610"
+        },
+        "2": {
+            "device_name": "Device2",
+            "managed_by_user_id": "two@mci.edu",
+            "is_active": true,
+            "end_of_life": null,
+            "creation_date": "{TinyDateTime}:2025-01-08T13:24:45.100610",
+            "last_update": "{TinyDateTime}:2025-01-08T13:24:45.100610"
+        },
+        "3": {
+            "device_name": "Device3",
+            "managed_by_user_id": "four@mci.edu",
+            "is_active": true,
+            "end_of_life": null,
+            "creation_date": "{TinyDateTime}:2025-01-08T13:24:45.125552",
+            "last_update": "{TinyDateTime}:2025-01-08T13:24:45.125552"
+        },
+        "4": {
+            "device_name": "Device4",
+            "managed_by_user_id": "two@mci.edu",
+            "is_active": true,
+            "end_of_life": null,
+            "creation_date": "{TinyDateTime}:2025-01-08T13:24:45.100610",
+            "last_update": "{TinyDateTime}:2025-01-08T13:24:45.100610"
+        }
+    }
+}

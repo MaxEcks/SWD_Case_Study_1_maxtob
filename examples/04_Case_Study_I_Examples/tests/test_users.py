@@ -4,7 +4,7 @@ import unittest
 # We must tell the interpreter where to find the module we want to test
 # Be careful with the path, it must be relative to the root of the project
 import sys
-sys.path.append('sources')
+sys.path.append('src')
 
 # import the geometries module
 from users import User
@@ -19,7 +19,7 @@ class TestUserLifeCycle(unittest.TestCase):
 
     def test_create_new_user(self):
         # Vorbedingung: Nutzer ist noch nicht angelegt
-        self.assertIsNone(User.find_all_by_attribute("ID", self.new_user_data["id"]))
+        self.assertIsNone(User.find_by_attribute("ID", self.new_user_data["id"]))
 
         # Neuer User wird in UI angelegt
         new_user = User(**self.new_user_data)
@@ -29,7 +29,7 @@ class TestUserLifeCycle(unittest.TestCase):
 
         # Nachbedingung: Nutzer ist angeleg
 
-        self.assertIsNotNone(User.find_all_by_attribute("ID", self.new_user_data["id"]))
+        self.assertIsNotNone(User.find_by_attribute("ID", self.new_user_data["id"]))
 
     def find_all_users(self):
         users = User.find_all()
@@ -47,13 +47,13 @@ class TestUserLifeCycle(unittest.TestCase):
 
     def test_delete_user(self):
         # Vorbedingung: Nutzer ist angelegt
-        self.assertIsNotNone(User.find_all_by_attribute("ID", self.new_user_data["id"]))
+        self.assertIsNotNone(User.find_by_attribute("ID", self.new_user_data["id"]))
 
         # Administrator wählt Nutzer löschen
         self.user.delete()
 
         # Nachbedingung: Nutzer ist gelöscht
-        self.assertIsNone(User.find_all_by_attribute("ID", self.new_user_data["id"]))
+        self.assertIsNone(User.find_by_attribute("ID", self.new_user_data["id"]))
 
 if __name__ == '__main__':
     unittest.main()
