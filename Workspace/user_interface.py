@@ -2,6 +2,7 @@ import streamlit as st
 from users import User
 from devices import Device
 import time
+from datetime import datetime
 
 st.write("# Gerätemanagement")
 
@@ -80,12 +81,14 @@ with tab2:
         # Eingabefelder zum Gerät hinzufügen 
         st.write("Geräte-ID wird automatisch vergeben (UUID)")
         device_name = st.text_input("Gerätename")
-        maintenance_interval = st.number_input("Wartungsintervall in Tage", min_value=1, step=1)
-        maintenance_cost = st.number_input("Wartungskosten in Euro", min_value=0.0, step=0.01)
         users = User.find_all()
         user_options = {f"{user.name} ({user.id})": user for user in users}
         managed_by_user = st.selectbox("Verantwortliche Person", list(user_options.keys()))
-
+        creation_date = st.date_input("Anschaffungsdatum (optional)", value=None)
+        end_of_life = st.date_input("Ende der Lebensdauer")
+        maintenance_interval = st.number_input("Wartungsintervall in Tage", min_value=1, step=1)
+        maintenance_cost = st.number_input("Wartungskosten in Euro", min_value=0.0, step=0.01)
+        
         if st.button("Gerät hinzufügen"):
             # Überprüfung ob Geräte-ID schon vorhanden ist
             existing_device = Device.find_by_attribute("device_name", device_name)
@@ -96,12 +99,23 @@ with tab2:
 
             elif device_name and managed_by_user:
                 managed_by_user_id = user_options[managed_by_user].id
-                new_device = Device(
-                    device_name = device_name,
-                    maintenance_interval = maintenance_interval,
-                    maintenance_cost = maintenance_cost,
-                    managed_by_user_id = managed_by_user_id
-                )
+                if creation_date:
+                    new_device = Device(
+                        device_name = device_name,
+                        maintenance_interval = maintenance_interval,
+                        maintenance_cost = maintenance_cost,
+                        managed_by_user_id = managed_by_user_id,
+                        end_of_life = end_of_life,
+                        creation_date = creation_date
+                    )
+                else:
+                    new_device = Device(
+                        device_name = device_name,
+                        maintenance_interval = maintenance_interval,
+                        maintenance_cost = maintenance_cost,
+                        managed_by_user_id = managed_by_user_id,
+                        end_of_life = end_of_life
+                    )
                 new_device.store_data()
                 st.success("Gerät hinzugefügt!")
                 time.sleep(3)
@@ -139,14 +153,20 @@ with tab2:
                         break
                 new_managed_by_user = st.selectbox("Verantwortliche Person", list(user_options.keys()), index=list(user_options.keys()).index(current_user_display), key="new_managed_by_user")
 
+                new_end_of_life = st.date_input("Ende der Lebensdauer", selected_device.end_of_life, key="new_end_of_life")
+
                 new_maintenance_interval = st.number_input("Wartungsintervall in Tage", min_value=1, step=1, value=selected_device.maintenance_interval, key="new_maintenance_interval")
                 new_maintenance_cost = st.number_input("Wartungskosten in Euro", min_value=0.0, step=0.01, value=selected_device.maintenance_cost, key="new_maintenance_cost")
+
+                new_last_update = datetime.today().date()
 
                 if st.button("Änderungen speichern", key="saves_changes_button"):
                     if new_device_name and new_managed_by_user:
                         selected_device.device_name = new_device_name
                         selected_user = user_options[new_managed_by_user]
-                        selected_device.managed_by_user_id = selected_user.id                      
+                        selected_device.managed_by_user_id = selected_user.id   
+                        selected_device.end_of_life = new_end_of_life
+                        selected_device.last_update = new_last_update                   
                         selected_device.maintenance_interval = new_maintenance_interval
                         selected_device.maintenance_cost = new_maintenance_cost
                                      
