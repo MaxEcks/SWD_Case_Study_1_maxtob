@@ -1,5 +1,6 @@
 from tinydb import TinyDB, Query
 from database_singleton import DatabaseConnector
+from datetime import datetime
 import uuid
 
 class Device():
@@ -7,11 +8,13 @@ class Device():
     db_connector = db_connector = DatabaseConnector().get_table('devices')
 
     # Constructor
-    def __init__(self, device_name : str, managed_by_user_id : str, maintenance_interval : int, maintenance_cost : float) -> None:
+    def __init__(self, device_name : str, managed_by_user_id : str, maintenance_interval : int, maintenance_cost : float, end_of_life : datetime, creation_date : datetime = None, last_update : datetime = None) -> None:
         self.device_id = str(uuid.uuid4())
+        self.creation_date = creation_date if creation_date else datetime.today().date()
+        self.last_update = last_update if last_update else datetime.today().date()
+        # ---------------------------------------
+        self.end_of_life = end_of_life
         self.device_name = device_name
-        # The user id of the user that manages the device
-        # We don't store the user object itself, but only the id (as a key)
         self.managed_by_user_id = managed_by_user_id
         self.maintenance_interval = maintenance_interval
         self.maintenance_cost = maintenance_cost
@@ -70,7 +73,10 @@ class Device():
                     device_name=d['device_name'],
                     managed_by_user_id=d['managed_by_user_id'],
                     maintenance_interval=d['maintenance_interval'],
-                    maintenance_cost=d['maintenance_cost']
+                    maintenance_cost=d['maintenance_cost'],
+                    end_of_life=d['end_of_life'],
+                    creation_date=d['creation_date'],
+                    last_update=d['last_update']
                 )
                 device.device_id = d['device_id']
                 device_results.append(device)
@@ -86,8 +92,11 @@ class Device():
             device = cls(
                 device_name=device_data['device_name'],
                 managed_by_user_id=device_data['managed_by_user_id'],
-                maintenance_interval=device_data.get('maintenance_interval'),
-                maintenance_cost=device_data.get('maintenance_cost')
+                maintenance_interval=device_data['maintenance_interval'],
+                maintenance_cost=device_data['maintenance_cost'],
+                end_of_life=device_data['end_of_life'],
+                creation_date=device_data['creation_date'],
+                last_update=device_data['last_update']
             )
             device.device_id = device_data['device_id']
             devices.append(device)
@@ -97,17 +106,17 @@ class Device():
 
 if __name__ == "__main__":
     
-    device1 = Device("Waschmaschine", "user1@mci.edu", 30, 10.0)
-    device2 = Device("3D-Drucker", "user2@mci.edu", 7, 5.0) 
-    device3 = Device("PC 1", "user2@mci.edu", 365, 100.0) 
-    device4 = Device("Lötstation", "user4@mci.edu", 90, 20.0) 
+    device1 = Device("Waschmaschine", "user1@mci.edu", 30, 10.0, datetime(2026, 12, 31).date())
+    device2 = Device("3D-Drucker", "user2@mci.edu", 7, 5.0, datetime(2026, 12, 31).date())
+    device3 = Device("PC 1", "user2@mci.edu", 365, 100.0, datetime(2026, 12, 31).date()) 
+    device4 = Device("Lötstation", "user4@mci.edu", 90, 20.0, datetime(2026, 12, 31).date()) 
     device1.store_data()
     device2.store_data()
     device3.store_data()
     device4.store_data()
 
     # overwrite device3:
-    device5 = Device("PC 1", "user3@mci.edu", 365, 100.0) 
+    device5 = Device("PC 1", "user3@mci.edu", 365, 100.0, datetime(2026, 12, 31).date()) 
     device5.store_data()
 
     # testing find_by_attribute method:
