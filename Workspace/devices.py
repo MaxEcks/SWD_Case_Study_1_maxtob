@@ -1,6 +1,7 @@
 from tinydb import TinyDB, Query
 from database_singleton import DatabaseConnector
 from datetime import datetime
+from datetime import timedelta
 import uuid
 
 class Device():
@@ -102,6 +103,23 @@ class Device():
             devices.append(device)
         return devices
 
+    def calculate_maintenance_in_period(self, start_date, end_date):
+        """Berechnung aller Wartungen und den dazugehoerigen Kosten im ausgewählten Zeitintervall"""
+        #current_date = max(self.creation_date, start_date)
+        maintenances = []
+        total_cost = 0
+
+        end_of_life_date = min(self.end_of_life, end_date)
+        current_date = current_date = self.creation_date + timedelta(days=self.maintenance_interval)
+        while current_date <= end_of_life_date:
+            if start_date <= current_date <= end_date:
+                maintenances.append(current_date)
+                total_cost = total_cost + self.maintenance_cost
+            current_date = current_date + timedelta(days = self.maintenance_interval)
+        
+        return maintenances, total_cost
+
+        
 # Module testing:
 
 if __name__ == "__main__":

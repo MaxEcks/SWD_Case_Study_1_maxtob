@@ -3,6 +3,7 @@ from users import User
 from devices import Device
 import time
 from datetime import datetime
+from datetime import timedelta
 
 st.write("# Gerätemanagement")
 
@@ -195,8 +196,47 @@ with tab3:
 
 with tab4:
     # Wartungsmanagement
-    st.write("#### Funktion in Bearbeitung!")
+    
+    start_date = st.date_input("Startdatum", value = datetime.today().date())
+    end_date = st.date_input("Enddatum (Standardeinstellung: Startdatum +90 Tage)", value = start_date + timedelta(days=90))
 
+    devices = Device.find_all()
+    device_name =["Alle Geräte"] + [device.device_name for device in devices]
+    selected_device_name = st.selectbox("Gerät auswählen", device_name, key="gerät_maintenance")
+
+    if st.button("Wartungen berechnen:"):
+        total_cost_all_devices = 0
+
+        if selected_device_name == "Alle Geräte":
+            st.write("### Wartungen aller Geräte im ausgewählten Zeitraum")
+            for device in devices:
+                maintenances, total_cost = device.calculate_maintenance_in_period(start_date, end_date)
+                total_cost_all_devices = total_cost_all_devices + total_cost
+                st.write(f"{device.device_name}:")
+                st.write(f"Wartungskosten gesamt: {total_cost:.2f}€")
+                st.write(f"Geplante Wartungstermine:")
+                for maintenance_date in maintenances:
+                    st.write(f"- {maintenance_date}")
+                st.write("--------")
+            
+            st.write(f"#### Gesamtkosten aller Wartungen für den Zeitraum vom {start_date} bis {end_date} betragen: {total_cost_all_devices:.2f}€")
+
+        else:
+            selected_device = Device.find_by_attribute("device_name", selected_device_name, 1)
+            if selected_device:
+                selected_device = selected_device[0]
+                maintenances, total_cost = selected_device.calculate_maintenance_in_period(start_date, end_date)
+                st.write(f"### Wartungen für: {selected_device.device_name}")
+                st.write(f"#### Wartungskosten gesamt: {total_cost:.2f}€")
+                st.write(f"#### Geplanten Wartungstermine:")
+                for maintenance_date in maintenances:
+                    st.write(f"{maintenance_date}")
+            else:
+                st.error("Fehler!")
+
+        if st.button("Ausgabe löschen"):
+            st.rerun()
+            
 # Konsolen Debugging:
 users = User.find_all()
 devices = Device.find_all()
